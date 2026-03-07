@@ -21,24 +21,23 @@ api.interceptors.request.use((config) => {
 export default api
 
 export const formatEuros = (value: number | null | undefined): string => {
-  if (value === null || value === undefined) return '–'
-  if (Math.abs(value) >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(2)} M€`
-  }
-  if (Math.abs(value) >= 1_000) {
-    return `${(value / 1_000).toFixed(0)} k€`
-  }
-  return `${value.toFixed(0)} €`
+  const n = Number(value)
+  if (value === null || value === undefined || isNaN(n)) return '–'
+  if (Math.abs(n) >= 1_000_000) return `${(n / 1_000_000).toFixed(2)} M€`
+  if (Math.abs(n) >= 1_000) return `${(n / 1_000).toFixed(0)} k€`
+  return `${n.toFixed(0)} €`
 }
 
 export const formatPct = (value: number | null | undefined): string => {
-  if (value === null || value === undefined) return '–'
-  return `${value.toFixed(1)} %`
+  const n = Number(value)
+  if (value === null || value === undefined || isNaN(n)) return '–'
+  return `${n.toFixed(1)} %`
 }
 
 export const formatAns = (value: number | null | undefined): string => {
-  if (value === null || value === undefined) return '–'
-  return `${value.toFixed(1)} ans`
+  const n = Number(value)
+  if (value === null || value === undefined || isNaN(n)) return '–'
+  return `${n.toFixed(1)} ans`
 }
 
 export const formatValue = (value: number | null | undefined, unite: string): string => {
