@@ -78,10 +78,10 @@ async def fetch_finances_dgfip(code_insee: str, annee: int) -> list[dict[str, An
 
 async def _build_demo_data(code_insee: str, annee: int) -> list[dict[str, Any]]:
     """
-    Données de démonstration basées sur les budgets de Sautron (44196).
+    Données de démonstration basées sur les budgets de Sautron (44194).
     Utilisées quand l'API externe est indisponible.
     """
-    if code_insee != "44196":
+    if code_insee != "44194":
         return []
 
     # Données basées sur l'annexe du cahier des charges (Sautron)

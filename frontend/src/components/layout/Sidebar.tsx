@@ -8,6 +8,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import clsx from 'clsx'
+import { CommuneSelector } from './CommuneSelector'
 
 const navItems = [
   { to: '/', label: 'Tableau de bord', icon: LayoutDashboard, end: true },
@@ -18,12 +19,11 @@ const navItems = [
 ]
 
 interface Props {
-  communeNom?: string
   onSync?: () => void
   isSyncing?: boolean
 }
 
-export function Sidebar({ communeNom, onSync, isSyncing }: Props) {
+export function Sidebar({ onSync, isSyncing }: Props) {
   return (
     <aside className="w-64 bg-primary-900 text-white flex flex-col h-screen sticky top-0">
       {/* Logo */}
@@ -32,13 +32,8 @@ export function Sidebar({ communeNom, onSync, isSyncing }: Props) {
         <p className="text-xs text-primary-100 mt-1">Tableau de bord financier</p>
       </div>
 
-      {/* Commune */}
-      {communeNom && (
-        <div className="px-4 py-3 bg-primary-800">
-          <p className="text-xs text-primary-300 uppercase tracking-wider">Commune</p>
-          <p className="text-sm font-semibold text-white mt-0.5">{communeNom}</p>
-        </div>
-      )}
+      {/* Sélecteur de commune */}
+      <CommuneSelector />
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">

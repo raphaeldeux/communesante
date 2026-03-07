@@ -4,7 +4,7 @@
 
 CommuneSante transforme les données financières publiques (DGFiP / data.gouv.fr) en indicateurs lisibles et actionnables pour piloter une commune. L'application est conçue pour les élus, les services municipaux et tout citoyen souhaitant comprendre la santé financière de sa commune.
 
-> Commune de référence : **Sautron** (Loire-Atlantique, 44) — code INSEE `44196`
+> Commune de référence : **Sautron** (Loire-Atlantique, 44) — code INSEE `44194`
 
 ---
 
@@ -46,8 +46,8 @@ CommuneSante transforme les données financières publiques (DGFiP / data.gouv.f
 
 ```
 Apache2 (80/443) — reverse proxy
-    ├── /api/*  →  Backend FastAPI (Python 3.12) :8000
-    └── /*      →  Frontend React/Vite            :3000
+    ├── /api/*  →  Backend FastAPI (Python 3.12)
+    └── /*      →  Frontend React/Vite
                         │
                    PostgreSQL 15 (interne Docker)
 ```
@@ -117,7 +117,7 @@ Renseigner au minimum :
 ```env
 POSTGRES_PASSWORD=mot_de_passe_fort_et_unique
 API_SECRET_TOKEN=token_aleatoire_32_caracteres_minimum
-COMMUNE_INSEE=44196
+COMMUNE_INSEE=44194
 SYNC_CRON=0 3 * * 0
 ```
 
@@ -187,7 +187,7 @@ La redirection HTTP → HTTPS peut être activée dans le même onglet via **"Re
 Une fois l'application accessible, déclencher la première synchronisation des données DGFiP :
 
 ```bash
-curl -X POST https://votre-domaine.fr/api/communes/44196/sync \
+curl -X POST https://votre-domaine.fr/api/communes/44194/sync \
      -H "X-API-Token: VOTRE_API_SECRET_TOKEN"
 ```
 
