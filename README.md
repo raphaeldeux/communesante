@@ -66,33 +66,31 @@ Apache2 (80/443) — reverse proxy
 
 ### Prérequis
 
-- VPS sous Debian/Ubuntu avec accès root
+- VPS sous Debian/Ubuntu avec **ISPConfig** installé et opérationnel
 - **Docker** et **Docker Compose** installés
-- **Apache2** installé avec les modules `proxy`, `proxy_http`, `ssl`, `rewrite`, `headers`
-- Un **nom de domaine** pointant vers l'IP du VPS
-- **Certbot** pour les certificats Let's Encrypt (HTTPS)
+- Un **domaine ou sous-domaine** déjà créé dans ISPConfig et pointant vers l'IP du VPS
+
+> ISPConfig gère Apache2, les VirtualHosts et les certificats SSL via son interface web. **Ne pas créer de VirtualHost manuellement** — ISPConfig écraserait toute configuration manuelle.
 
 ---
 
-### 1. Installer les dépendances système
+### 1. Installer Docker
 
 ```bash
-# Mettre à jour le système
-apt update && apt upgrade -y
-
-# Installer Docker
+# En tant que root ou avec sudo
+apt update
 curl -fsSL https://get.docker.com | sh
-usermod -aG docker $USER
+usermod -aG docker $USER   # remplacer $USER par l'utilisateur système ISPConfig du site
 
 # Installer Docker Compose
 apt install docker-compose-plugin -y
+```
 
-# Installer Apache2 et Certbot
-apt install apache2 certbot python3-certbot-apache -y
+Vérifier l'activation des modules Apache2 nécessaires au proxy (normalement déjà présents avec ISPConfig) :
 
-# Activer les modules Apache2 nécessaires
-a2enmod proxy proxy_http proxy_wstunnel ssl rewrite headers
-systemctl restart apache2
+```bash
+a2enmod proxy proxy_http proxy_wstunnel headers
+systemctl reload apache2
 ```
 
 ---
@@ -129,8 +127,6 @@ SYNC_CRON=0 3 * * 0
 
 ### 4. Lancer l'application avec Docker Compose
 
-Utiliser la variante Apache2 (expose les services en local sur `127.0.0.1`) :
-
 ```bash
 docker compose -f docker-compose.apache.yml up -d --build
 ```
@@ -147,37 +143,42 @@ Les services sont alors accessibles localement :
 
 ---
 
-### 5. Configurer Apache2
+### 5. Configurer le reverse proxy dans ISPConfig
 
-Copier la configuration fournie :
+ISPConfig gère les VirtualHosts via son interface. La configuration proxy se fait dans le champ **"Apache Directives"** du site.
 
-```bash
-cp apache/communesante.conf /etc/apache2/sites-available/communesante.conf
+**Dans ISPConfig → Sites → Votre site → onglet "Options" → "Apache Directives" :**
+
+```apache
+# Proxy vers l'API backend (FastAPI)
+ProxyPreserveHost On
+ProxyPass        /api/ http://127.0.0.1:8000/
+ProxyPassReverse /api/ http://127.0.0.1:8000/
+
+# Proxy vers le frontend (React SPA)
+ProxyPass        / http://127.0.0.1:3000/
+ProxyPassReverse / http://127.0.0.1:3000/
+
+# Support WebSocket
+RewriteEngine On
+RewriteCond %{HTTP:Upgrade} websocket [NC]
+RewriteCond %{HTTP:Connection} upgrade [NC]
+RewriteRule ^/?(.*) "ws://127.0.0.1:3000/$1" [P,L]
 ```
 
-Éditer le fichier pour remplacer `votre-domaine.fr` par votre domaine réel :
-
-```bash
-nano /etc/apache2/sites-available/communesante.conf
-```
-
-Activer le site (version HTTP d'abord, avant Certbot) :
-
-```bash
-# Activer uniquement le VirtualHost HTTP pour commencer
-a2ensite communesante
-systemctl reload apache2
-```
+Cliquer sur **Enregistrer**. ISPConfig recharge Apache2 automatiquement.
 
 ---
 
-### 6. Obtenir un certificat SSL (Let's Encrypt)
+### 6. Activer SSL (Let's Encrypt) via ISPConfig
 
-```bash
-certbot --apache -d votre-domaine.fr -d www.votre-domaine.fr
-```
+Dans **ISPConfig → Sites → Votre site → onglet "SSL"** :
 
-Certbot met à jour automatiquement la configuration Apache2 avec les certificats. La redirection HTTP → HTTPS est déjà prévue dans le fichier `communesante.conf`.
+1. Cocher **SSL**
+2. Cocher **Let's Encrypt**
+3. Enregistrer — ISPConfig génère et installe le certificat automatiquement
+
+La redirection HTTP → HTTPS peut être activée dans le même onglet via **"Redirect Type"** → `[R=301,L]`.
 
 ---
 
