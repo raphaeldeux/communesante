@@ -3,18 +3,18 @@ import { useFinancesAnnee, useFinancesAll, useEvolution } from '../hooks/useComm
 import { EvolutionChart } from '../components/charts/EvolutionChart'
 import { Header } from '../components/layout/Header'
 import { formatEuros, formatAns } from '../lib/api'
+import { useSelectedCommune } from '../contexts/CommuneContext'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts'
 
-const DEFAULT_INSEE = import.meta.env.VITE_COMMUNE_INSEE || '44196'
-
 export function Dette() {
-  const { data: exercices } = useFinancesAll(DEFAULT_INSEE)
+  const { insee } = useSelectedCommune()
+  const { data: exercices } = useFinancesAll(insee)
   const annees = exercices?.map(e => e.annee).sort((a, b) => b - a) || []
   const [annee, setAnnee] = useState<number>(annees[0] || new Date().getFullYear())
-  const { data: finances, isLoading } = useFinancesAnnee(DEFAULT_INSEE, annee || annees[0])
-  const { data: evolution } = useEvolution(DEFAULT_INSEE)
+  const { data: finances, isLoading } = useFinancesAnnee(insee, annee || annees[0])
+  const { data: evolution } = useEvolution(insee)
 
   if (annees.length > 0 && !annee) setAnnee(annees[0])
 

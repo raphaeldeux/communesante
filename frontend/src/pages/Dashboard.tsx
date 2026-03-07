@@ -5,16 +5,16 @@ import { ScoreGauge } from '../components/ui/ScoreGauge'
 import { AlerteBanner } from '../components/ui/AlerteBanner'
 import { EvolutionChart } from '../components/charts/EvolutionChart'
 import { Header } from '../components/layout/Header'
-
-const DEFAULT_INSEE = import.meta.env.VITE_COMMUNE_INSEE || '44196'
+import { useSelectedCommune } from '../contexts/CommuneContext'
 
 export function Dashboard() {
+  const { insee } = useSelectedCommune()
   const [annee, setAnnee] = useState<number | undefined>(undefined)
 
-  const { data: score, isLoading: scoreLoading, error: scoreError } = useScore(DEFAULT_INSEE, annee)
-  const { data: alertes } = useAlertes(DEFAULT_INSEE)
-  const { data: evolution } = useEvolution(DEFAULT_INSEE)
-  const { data: exercices } = useFinancesAll(DEFAULT_INSEE)
+  const { data: score, isLoading: scoreLoading, error: scoreError } = useScore(insee, annee)
+  const { data: alertes } = useAlertes(insee)
+  const { data: evolution } = useEvolution(insee)
+  const { data: exercices } = useFinancesAll(insee)
 
   const annees = exercices?.map(e => e.annee).sort((a, b) => b - a) || []
 

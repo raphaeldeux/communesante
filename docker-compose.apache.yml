@@ -26,7 +26,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://communesante:${POSTGRES_PASSWORD}@db:5432/communesante
       API_SECRET_TOKEN: ${API_SECRET_TOKEN}
-      COMMUNE_INSEE: ${COMMUNE_INSEE:-44196}
+      COMMUNE_INSEE: ${COMMUNE_INSEE:-44194}
       DGFIP_API_KEY: ${DGFIP_API_KEY:-}
       SYNC_CRON: ${SYNC_CRON:-0 3 * * 0}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
