@@ -138,8 +138,8 @@ docker compose -f docker-compose.apache.yml ps
 ```
 
 Les services sont alors accessibles localement :
-- Backend API : `http://127.0.0.1:8000`
-- Frontend : `http://127.0.0.1:3000`
+- Backend API : `http://127.0.0.1:8010`
+- Frontend : `http://127.0.0.1:3010`
 
 ---
 
@@ -152,18 +152,18 @@ ISPConfig gère les VirtualHosts via son interface. La configuration proxy se fa
 ```apache
 # Proxy vers l'API backend (FastAPI)
 ProxyPreserveHost On
-ProxyPass        /api/ http://127.0.0.1:8000/
-ProxyPassReverse /api/ http://127.0.0.1:8000/
+ProxyPass        /api/ http://127.0.0.1:8010/
+ProxyPassReverse /api/ http://127.0.0.1:8010/
 
 # Proxy vers le frontend (React SPA)
-ProxyPass        / http://127.0.0.1:3000/
-ProxyPassReverse / http://127.0.0.1:3000/
+ProxyPass        / http://127.0.0.1:3010/
+ProxyPassReverse / http://127.0.0.1:3010/
 
 # Support WebSocket
 RewriteEngine On
 RewriteCond %{HTTP:Upgrade} websocket [NC]
 RewriteCond %{HTTP:Connection} upgrade [NC]
-RewriteRule ^/?(.*) "ws://127.0.0.1:3000/$1" [P,L]
+RewriteRule ^/?(.*) "ws://127.0.0.1:3010/$1" [P,L]
 ```
 
 Cliquer sur **Enregistrer**. ISPConfig recharge Apache2 automatiquement.
