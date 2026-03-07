@@ -37,7 +37,16 @@ export function Dashboard() {
     )
   }
 
-  if (!score) return null
+  if (!score) {
+    return (
+      <div className="bg-warning-100 border border-warning-500 rounded-xl p-6 text-center">
+        <p className="text-warning-700 font-medium">Aucune donnée disponible</p>
+        <p className="text-warning-600 text-sm mt-2">
+          Cliquez sur "Synchroniser" dans le menu pour charger les données financières.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
