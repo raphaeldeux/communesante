@@ -3,7 +3,8 @@ interface Props {
   interpretation: string
 }
 
-export function ScoreGauge({ score, interpretation }: Props) {
+export function ScoreGauge({ score: scoreProp, interpretation }: Props) {
+  const score = Number(scoreProp) || 0
   const getColor = (s: number) => {
     if (s >= 80) return { stroke: '#22c55e', text: 'text-success-700', bg: 'bg-success-100' }
     if (s >= 65) return { stroke: '#84cc16', text: 'text-lime-700', bg: 'bg-lime-100' }
