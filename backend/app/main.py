@@ -30,6 +30,8 @@ async def lifespan(app: FastAPI):
     from app.services.sync import sync_commune_finances
     from sqlalchemy import select
 
+    ANNEES_VALIDES = list(range(2020, 2025))
+
     async with AsyncSessionLocal() as db:
         # Supprimer l'ancienne commune 44196 (Sévérac — code INSEE incorrect)
         old = await db.execute(select(Commune).where(Commune.code_insee == "44196"))
@@ -43,19 +45,36 @@ async def lifespan(app: FastAPI):
             select(Commune).where(Commune.code_insee == settings.commune_insee)
         )
         commune = result.scalar_one_or_none()
-        has_data = False
+
         if commune:
+            # Supprimer les exercices hors de la plage 2020-2024
+            from sqlalchemy import not_
+            hors_plage = await db.execute(
+                select(ExerciceFinancier).where(
+                    ExerciceFinancier.commune_id == commune.id,
+                    not_(ExerciceFinancier.annee.in_(ANNEES_VALIDES)),
+                )
+            )
+            a_supprimer = hors_plage.scalars().all()
+            if a_supprimer:
+                for ex in a_supprimer:
+                    await db.delete(ex)
+                await db.commit()
+                logger.info(f"{len(a_supprimer)} exercice(s) hors 2020-2024 supprimé(s)")
+
             ex = await db.execute(
                 select(ExerciceFinancier)
                 .where(ExerciceFinancier.commune_id == commune.id)
                 .limit(1)
             )
             has_data = ex.scalar_one_or_none() is not None
+        else:
+            has_data = False
 
         if not has_data:
             logger.info(f"Synchronisation initiale automatique pour {settings.commune_insee}")
             try:
-                rapport = await sync_commune_finances(db, settings.commune_insee, annees=list(range(2020, 2025)))
+                rapport = await sync_commune_finances(db, settings.commune_insee, annees=ANNEES_VALIDES)
                 logger.info(f"Sync initiale terminée: {rapport}")
             except Exception as e:
                 logger.warning(f"Sync initiale non bloquante échouée: {e}")
