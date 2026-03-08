@@ -31,6 +31,14 @@ async def lifespan(app: FastAPI):
     from sqlalchemy import select
 
     async with AsyncSessionLocal() as db:
+        # Supprimer l'ancienne commune 44196 (Sévérac — code INSEE incorrect)
+        old = await db.execute(select(Commune).where(Commune.code_insee == "44196"))
+        old_commune = old.scalar_one_or_none()
+        if old_commune:
+            await db.delete(old_commune)
+            await db.commit()
+            logger.info("Ancienne commune 44196 (Sévérac) supprimée de la base")
+
         result = await db.execute(
             select(Commune).where(Commune.code_insee == settings.commune_insee)
         )
