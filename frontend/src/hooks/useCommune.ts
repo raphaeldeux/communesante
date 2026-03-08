@@ -5,7 +5,7 @@ import type { Commune, FinancesDetail, ScoreData, Alerte, EvolutionPoint, Exerci
 export function useListCommunes() {
   return useQuery<Commune[]>({
     queryKey: ['communes'],
-    queryFn: () => api.get('/communes/').then(r => r.data),
+    queryFn: () => api.get('/communes/').then(r => Array.isArray(r.data) ? r.data : []),
   })
 }
 
