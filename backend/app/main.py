@@ -23,6 +23,35 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Base de données initialisée")
 
+    # Synchronisation initiale si la commune par défaut n'a pas de données
+    from app.database import AsyncSessionLocal
+    from app.models.commune import Commune
+    from app.models.finance import ExerciceFinancier
+    from app.services.sync import sync_commune_finances
+    from sqlalchemy import select
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(Commune).where(Commune.code_insee == settings.commune_insee)
+        )
+        commune = result.scalar_one_or_none()
+        has_data = False
+        if commune:
+            ex = await db.execute(
+                select(ExerciceFinancier)
+                .where(ExerciceFinancier.commune_id == commune.id)
+                .limit(1)
+            )
+            has_data = ex.scalar_one_or_none() is not None
+
+        if not has_data:
+            logger.info(f"Synchronisation initiale automatique pour {settings.commune_insee}")
+            try:
+                rapport = await sync_commune_finances(db, settings.commune_insee)
+                logger.info(f"Sync initiale terminée: {rapport}")
+            except Exception as e:
+                logger.warning(f"Sync initiale non bloquante échouée: {e}")
+
     # Démarrer le scheduler de synchronisation
     from app.scheduler import start_scheduler
     scheduler = start_scheduler()
