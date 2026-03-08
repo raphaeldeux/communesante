@@ -55,7 +55,7 @@ async def lifespan(app: FastAPI):
         if not has_data:
             logger.info(f"Synchronisation initiale automatique pour {settings.commune_insee}")
             try:
-                rapport = await sync_commune_finances(db, settings.commune_insee)
+                rapport = await sync_commune_finances(db, settings.commune_insee, annees=list(range(2020, 2025)))
                 logger.info(f"Sync initiale terminée: {rapport}")
             except Exception as e:
                 logger.warning(f"Sync initiale non bloquante échouée: {e}")

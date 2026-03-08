@@ -84,6 +84,10 @@ async def _build_demo_data(code_insee: str, annee: int) -> list[dict[str, Any]]:
     if code_insee != "44194":
         return []
 
+    # Données DGFiP disponibles uniquement de 2020 à 2024
+    if annee not in range(2020, 2025):
+        return []
+
     # Données basées sur l'annexe du cahier des charges (Sautron)
     base_recettes = {
         2020: 8_800_000,
