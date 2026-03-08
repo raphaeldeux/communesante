@@ -11,6 +11,13 @@ from app.services.dgfip import get_commune_info
 router = APIRouter(prefix="/communes", tags=["Communes"])
 
 
+@router.get("/", response_model=list[CommuneSchema])
+async def list_communes(db: AsyncSession = Depends(get_db)):
+    """Liste toutes les communes en base."""
+    result = await db.execute(select(Commune).order_by(Commune.nom))
+    return result.scalars().all()
+
+
 @router.get("/{insee}", response_model=CommuneSchema)
 async def get_commune(insee: str, db: AsyncSession = Depends(get_db)):
     """Récupère les informations d'une commune."""
@@ -34,10 +41,3 @@ async def get_commune(insee: str, db: AsyncSession = Depends(get_db)):
         await db.refresh(commune)
 
     return commune
-
-
-@router.get("/", response_model=list[CommuneSchema])
-async def list_communes(db: AsyncSession = Depends(get_db)):
-    """Liste toutes les communes en base."""
-    result = await db.execute(select(Commune).order_by(Commune.nom))
-    return result.scalars().all()
