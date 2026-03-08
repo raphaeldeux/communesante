@@ -14,9 +14,15 @@ const CommuneContext = createContext<CommuneContextType>({
 })
 
 export function CommuneProvider({ children }: { children: ReactNode }) {
-  const [insee, setInseeState] = useState<string>(
-    () => localStorage.getItem(STORAGE_KEY) || DEFAULT_INSEE
-  )
+  const [insee, setInseeState] = useState<string>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    // Réinitialiser si l'ancien code INSEE incorrect (44196 = Sévérac) est en cache
+    if (!stored || stored === '44196') {
+      localStorage.removeItem(STORAGE_KEY)
+      return DEFAULT_INSEE
+    }
+    return stored
+  })
 
   const setInsee = (code: string) => {
     localStorage.setItem(STORAGE_KEY, code)
