@@ -60,8 +60,11 @@ async def sync_commune_finances(
         Rapport de synchronisation
     """
     if annees is None:
-        current_year = datetime.now().year
-        annees = list(range(2020, current_year + 1))
+        # L'OFGL publie les données N-1 au fil de l'année N.
+        # Le dataset ofgl-base-communes-consolidee couvre actuellement 2017-2024.
+        # On plafonne à 2024 pour éviter des requêtes sur des exercices non encore publiés.
+        OFGL_LAST_YEAR = 2024
+        annees = list(range(2020, OFGL_LAST_YEAR + 1))
 
     commune = await get_or_create_commune(db, code_insee)
     rapport = {"commune": commune.nom, "annees_traitees": [], "erreurs": []}
